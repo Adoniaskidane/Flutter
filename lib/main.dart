@@ -1,5 +1,6 @@
 import 'package:bunamedia/Pages/homepage.dart';
 import 'package:bunamedia/Pages/signin.dart';
+import 'package:bunamedia/Pages/signup.dart';
 import 'package:bunamedia/Pages/welcomepage.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +20,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const WelcomPage(),
+      //home: const WelcomPage(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const WelcomPage(),
+        '/home':(context)=>const HomePage(),
+        '/SignIn':(context)=>const SignInPage(),
+        '/SignUp':(context)=>const SignUpPage(),
+      },
     );
   }
 }

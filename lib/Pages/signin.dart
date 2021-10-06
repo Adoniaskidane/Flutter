@@ -20,22 +20,29 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child:Center(
-          child: Column(
-            children: [
-              Text("SignIn page"),
-              ElevatedButton(
-                onPressed:() {
-                  Navigator.pop(context);
-                  Navigator.push(context,MaterialPageRoute(builder: (context) =>const HomePage()));
-                },
-                child: Text("Login"),
-              )
-            ],
-          ),
-        )
-      ), 
+        body:Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("SignIn page"),
+                ElevatedButton(
+                  onPressed:() {
+                    //Navigator.pop(context);
+                    //Navigator.push(context,MaterialPageRoute(builder: (context) =>const HomePage()));
+                    Navigator.pushReplacementNamed(context,'/home');
+                  },
+                  child: Text("Login"),
+                ),
+                Text("You Don't Have an account"),
+                ElevatedButton(
+                  onPressed: (){
+                    Navigator.pushNamed(context, '/SignUp');
+                  },
+                  child: Text('SignUp'),
+                ),
+              ],
+            ),
+          )
     );
   }
 }
