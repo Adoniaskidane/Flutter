@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:bunamedia/Pages/services/auth.dart';
 import 'package:flutter/material.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -10,6 +11,17 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+
+  UserAuthentication _authentication=UserAuthentication(FirebaseAuth.instance);
+
+  TextEditingController _username=TextEditingController();
+  TextEditingController _Firstname=TextEditingController();
+  TextEditingController _Lastname=TextEditingController();
+  TextEditingController _email=TextEditingController();
+  TextEditingController _password=TextEditingController();
+
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,9 +32,11 @@ class _SignUpPageState extends State<SignUpPage> {
             child: ListView(
               padding:EdgeInsets.fromLTRB(0, 70,0,0),
               children: [
+
                     Container(
                       width:MediaQuery.of(context).size.width*0.7,
                       child: TextFormField(
+                        controller: _username,
                         decoration: InputDecoration(
                           hintText: 'Username',
                           border:OutlineInputBorder(
@@ -37,10 +51,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                     ),
+
                     SizedBox(height: 10),
+
                     Container(
                       width:MediaQuery.of(context).size.width*0.7,
                       child: TextFormField(
+                        controller: _Firstname,
                         decoration: InputDecoration(
                           hintText: 'Firstname',
                           border:OutlineInputBorder(
@@ -55,10 +72,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                     ),
+
                     SizedBox(height: 10,),
+
                     Container(
                       width:MediaQuery.of(context).size.width*0.7,
                       child: TextFormField(
+                        controller: _Lastname,
                         decoration: InputDecoration(
                           hintText: 'Lastname',
                           border:OutlineInputBorder(
@@ -73,12 +93,15 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                     ),
+
                     SizedBox(height: 10,),
+
                     Container(
                       width:MediaQuery.of(context).size.width*0.7,
                       child: TextFormField(
+                        controller: _email,
                         decoration: InputDecoration(
-                          hintText: 'someone@gmail.com',
+                          hintText: 'someonewith@udc.com',
                           border:OutlineInputBorder(
                             borderSide: BorderSide(width: 3,color: Colors.orange),
                             borderRadius: BorderRadius.circular(15),
@@ -91,10 +114,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
                     ),
+
                     SizedBox(height: 10,),
+
                     Container(
                       width:MediaQuery.of(context).size.width*0.7,
                       child: TextFormField(
+                        controller: _password,
                         decoration: InputDecoration(
                           hintText: 'Password',
                           border:OutlineInputBorder(
@@ -105,22 +131,33 @@ class _SignUpPageState extends State<SignUpPage> {
                             borderSide: BorderSide(width: 3,color: Colors.orange),
                             borderRadius: BorderRadius.circular(15),
                           )
-
                         ),
                       ),
                     ),
-                    SizedBox(height: 10,),
+
+                SizedBox(height: 10,),
+
                 Container(
                   color: Colors.white,
                   child: ElevatedButton(
                     
-                    onPressed: (){
-                      Navigator.pop(context);
+                    onPressed: ()async{
+                      print(_email.text+" = "+_password.text);
+                      final result=await _authentication.SignUp(_email.text, _password.text);
+                      if(result){
+                        print('Successfuly SignUp');
+                        Navigator.pop(context);
+                      }else{
+                        print('Failed to SignUp');
+                      }
+                      
                     },
                     child: Text("SignUp here"),
                   ),
                 ),
+
                 SizedBox(height: 10,),
+
                 Container(
                   color: Colors.white,
                   child: ElevatedButton(
@@ -131,7 +168,6 @@ class _SignUpPageState extends State<SignUpPage> {
                     child: Text("LogIn"),
                   ),
                 ),
-
               ],
             ),
           ),

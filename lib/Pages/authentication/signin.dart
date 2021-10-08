@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
-
+import 'package:bunamedia/Pages/services/auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SignInPage extends StatefulWidget {
@@ -11,7 +12,10 @@ class SignInPage extends StatefulWidget {
 
 
 class _SignInPageState extends State<SignInPage> {
+  UserAuthentication _authentication=UserAuthentication(FirebaseAuth.instance);
 
+  TextEditingController _email=TextEditingController();
+  TextEditingController _password=TextEditingController();
   @override
   void initState(){
     super.initState();
@@ -27,6 +31,7 @@ class _SignInPageState extends State<SignInPage> {
                 Container(
                   width:MediaQuery.of(context).size.width*0.7,
                   child: TextFormField(
+                    controller: _email,
                     decoration: InputDecoration(
                       hintText: 'someone@gmail.com',
                       border:OutlineInputBorder(
@@ -45,6 +50,7 @@ class _SignInPageState extends State<SignInPage> {
                 Container(
                   width:MediaQuery.of(context).size.width*0.7,
                   child: TextFormField(
+                    controller: _password,
                     decoration: InputDecoration(
                       hintText: 'Password',
                       border:OutlineInputBorder(
@@ -61,8 +67,17 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 SizedBox(height: 10,),
                 ElevatedButton(
-                  onPressed:() {
-                    Navigator.pushReplacementNamed(context,'/home');
+                  onPressed:() async{
+                    final result=await _authentication.SignIn(_email.text,_password.text);
+                    if(result)
+                    {
+                      print("LoggedIn successfuly");
+                      Navigator.pushReplacementNamed(context,'/home');
+                    }
+                    else{
+                      print('Failed to LogIn successfuly');
+                    }
+                   
                   },
                   child: Text("Login"),
                 ),
