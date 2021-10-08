@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_unnecessary_containers, prefer_const_constructors
-import 'package:bunamedia/Pages/signin.dart';
 import 'package:flutter/material.dart';
 
+//Stless WelcomPage With a continue button
 class WelcomPage extends StatelessWidget {
   const WelcomPage({ Key? key }) : super(key: key);
   @override
@@ -14,8 +14,6 @@ class WelcomPage extends StatelessWidget {
            children: [
              ElevatedButton(
                onPressed: (){
-                //Navigator.pop(context);
-                //Navigator.push(context,MaterialPageRoute(builder: (context) =>const SignInPage()));
                 Navigator.pushReplacementNamed(context, '/SignIn');
                },
                child: Text("Continue To SignIn or LogIn")

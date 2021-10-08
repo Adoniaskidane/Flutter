@@ -1,6 +1,6 @@
+import 'package:bunamedia/Pages/authentication/signin.dart';
+import 'package:bunamedia/Pages/authentication/signup.dart';
 import 'package:bunamedia/Pages/homepage.dart';
-import 'package:bunamedia/Pages/signin.dart';
-import 'package:bunamedia/Pages/signup.dart';
 import 'package:bunamedia/Pages/welcomepage.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      //home: const WelcomPage(),
+      //When the app start user will land on Welcome Page.
       initialRoute: '/',
       routes: {
         '/': (context) => const WelcomPage(),
