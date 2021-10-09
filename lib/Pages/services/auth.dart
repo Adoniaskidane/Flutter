@@ -28,5 +28,25 @@ class UserAuthentication{
 
 
 class validator{
+
+  String? emailValidator(String? value){
+    if(value!.isEmpty)
+    {
+      return "enter email!";
+    }
+    else if(!RegExp(r'[a-zA-Z]+\.+[a-zA-z]+@gmail.com').hasMatch(value)){
+      return "Fix Email Format";
+    }
+    return null;
+    //return "email Worked out well";
+  }
+
+  String? passValidator(String? value){
+    if(value!.isEmpty)
+    {
+      return "enter email!";
+    }
+    return null;
+  }
   
 }
