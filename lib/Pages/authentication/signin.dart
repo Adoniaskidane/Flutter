@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
 import 'package:bunamedia/Pages/services/auth.dart';
+import 'package:bunamedia/Pages/services/pref.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,11 @@ class _SignInPageState extends State<SignInPage> {
   void initState(){
     super.initState();
     print("Hello World");
+  }
+
+  void keepLogged(String value)async{
+    Userpreference pref=Userpreference();
+    final result=await pref.setUserprefrerence(value);
   }
   @override
   Widget build(BuildContext context) {
@@ -79,7 +85,8 @@ class _SignInPageState extends State<SignInPage> {
                       if(result)
                       {
                         print("LoggedIn successfuly");
-                        Navigator.pushReplacementNamed(context,'/home');
+                        keepLogged(_email.text);
+                        Navigator.pushReplacementNamed(context,'/home',arguments: {'logged': false});
                       }
                       else{
                         print('Failed to LogIn successfuly');
