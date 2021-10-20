@@ -78,7 +78,7 @@ class _AccountState extends State<Account> with AutomaticKeepAliveClientMixin{
             ],
           ),
           Container(
-            height: MediaQuery.of(context).size.height*0.3 ,
+            height: MediaQuery.of(context).size.height*0.1 ,
             width: MediaQuery.of(context).size.width,
             color: Colors.lightBlue[100],
             child: Center(child: Text("List view of User Post")),

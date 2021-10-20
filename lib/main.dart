@@ -1,6 +1,7 @@
 import 'package:bunamedia/Pages/authentication/signin.dart';
 import 'package:bunamedia/Pages/authentication/signup.dart';
 import 'package:bunamedia/Pages/homepage.dart';
+import 'package:bunamedia/Pages/loadpage.dart';
 import 'package:bunamedia/Pages/welcomepage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -26,7 +27,8 @@ class MyApp extends StatelessWidget {
       //When the app start user will land on Welcome Page.
       initialRoute: '/',
       routes: {
-        '/': (context) => const WelcomPage(),
+        '/welcome': (context) => const WelcomPage(),
+        '/':(context) => const LoadScreen(),
         '/home':(context)=>const HomePage(),
         '/SignIn':(context)=>const SignInPage(),
         '/SignUp':(context)=>const SignUpPage(),

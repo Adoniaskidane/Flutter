@@ -18,7 +18,7 @@ class _WelcomPageState extends State<WelcomPage> {
     // TODO: implement initState
     print('Welcome Page init');
     super.initState();
-    UserSharedpref();
+    //UserSharedpref();
   }
 
   void UserSharedpref() async{
@@ -42,6 +42,7 @@ class _WelcomPageState extends State<WelcomPage> {
              ElevatedButton(
                onPressed: (){
                 Navigator.pushReplacementNamed(context, '/SignIn');
+
                },
                child: Text("Continue To SignIn or LogIn")
                ),
@@ -49,6 +50,44 @@ class _WelcomPageState extends State<WelcomPage> {
          ),
          ),
        ),
-    );
+    );    
   }
+}
+
+
+
+class CustomNamedPageTransition extends PageRouteBuilder {
+  CustomNamedPageTransition(
+    GlobalKey materialAppKey,
+    String routeName, {
+    Object? arguments,
+  }) : super(
+          settings: RouteSettings(
+            arguments: arguments,
+            name: routeName,
+          ),
+          pageBuilder: (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+          ) {
+            assert(materialAppKey.currentWidget != null);
+            assert(materialAppKey.currentWidget is MaterialApp);
+            var mtapp = materialAppKey.currentWidget as MaterialApp;
+            var routes = mtapp.routes;
+            assert(routes!.containsKey(routeName));
+            return routes![routeName]!(context);
+          },
+          transitionsBuilder: (
+            BuildContext context,
+            Animation<double> animation,
+            Animation<double> secondaryAnimation,
+            Widget child,
+          ) =>
+              FadeTransition(
+            opacity: animation,
+            child: child,
+          ),
+          transitionDuration: Duration(seconds: 1),
+        );
 }

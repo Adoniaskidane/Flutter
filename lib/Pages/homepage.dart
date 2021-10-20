@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: prefer_const_constructors, non_constant_identifier_names, avoid_print
 import 'package:bunamedia/Pages/Nav/account.dart';
 import 'package:bunamedia/Pages/Nav/explore.dart';
 import 'package:bunamedia/Pages/Nav/home.dart';
@@ -56,11 +56,13 @@ class _HomePageState extends State<HomePage> {
     Widget build(BuildContext context) {
     print(ModalRoute.of(context)?.settings.arguments);
     return Scaffold(
+      appBar: AppBar(
+        title: Text("HomePage"),
+      ),
       body:PageView(
         controller:_pageController ,
         children:_screens,
         onPageChanged: _onpagechanged,
-
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
