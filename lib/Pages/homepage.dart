@@ -50,11 +50,11 @@ class _HomePageState extends State<HomePage> {
           _pageController.jumpToPage(index);
       }
 
-
-
     @override
     Widget build(BuildContext context) {
+      print('Homepage Build');
     print(ModalRoute.of(context)?.settings.arguments);
+    print("-----------");
     return Scaffold(
       appBar: AppBar(
         title: Text("HomePage"),
@@ -96,7 +96,7 @@ class _HomePageState extends State<HomePage> {
             ElevatedButton(
               onPressed: (){
                 keepLoggedOut();
-                Navigator.popAndPushNamed(context,'/');
+                Navigator.pushReplacementNamed(context,'/');
               },
               child:Text("SignOut"),
             )

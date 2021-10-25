@@ -1,7 +1,13 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-
+import 'package:bunamedia/Pages/services/user.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:bunamedia/Pages/services/pref.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'dart:io';
 
 class Account extends StatefulWidget {
   const Account({ Key? key }) : super(key: key);
@@ -11,40 +17,31 @@ class Account extends StatefulWidget {
 }
 
 class _AccountState extends State<Account> with AutomaticKeepAliveClientMixin{
+
+  CUser user=CUser();
+  bool loaded=false;
   String CurrentUser='';
-  Future<String> getCurrentUser() async{
-    Userpreference pref=Userpreference();
-    final result= await pref.getUserprefrerence();
-    print(result);
-    CurrentUser=result;
-    return CurrentUser;
-  }
+  late File _image;
+  //bool filePicked=false;
+  final picker = ImagePicker();
+
 
   @override
   void initState(){
+    LoadData();
     super.initState();
+    
   }
   @override
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      body: SafeArea(
-        child: FutureBuilder(
-          future:getCurrentUser(),
-          builder:(context, snapshot){
-            if(snapshot.connectionState==ConnectionState.done)
-            {
-              return Profile(snapshot.data.toString());
-            }else{
-              return CircularProgressIndicator();
-            }
-          }
-        ),
-      ),
+      body:loaded==true?Profile(user.uid,user.profile):
+              Center(child: CircularProgressIndicator()),      
     );
   }
 
-  Widget Profile(String user){
+  Widget Profile(String user,String profile){
     return Container(
       child: Column(
         children: [
@@ -65,9 +62,27 @@ class _AccountState extends State<Account> with AutomaticKeepAliveClientMixin{
                 left: MediaQuery.of(context).size.width*0.3,
                 top:MediaQuery.of(context).size.height*0.05 ,
                 child: CircleAvatar(
-                  backgroundColor:Colors.orange,
-                  child: Text("Profile"),
+                  backgroundColor:Colors.white,
+                  child:ClipRRect(borderRadius:BorderRadius.circular(70),child:Image.network(profile,fit: BoxFit.fill,)),
                   radius: 70,
+                ),
+              ),
+         
+              Positioned(
+                left: MediaQuery.of(context).size.width*0.4,
+                top:MediaQuery.of(context).size.height*0.2 ,
+                child: ElevatedButton(
+                  onPressed: ()async{
+                    print("pressed");
+                    await getImage();
+                    await uploadImage();
+                    await loadImage();
+                    setState((){      
+                      print(_image);
+                      //filePicked=true;
+                    });
+                  },
+                  child: Icon(FontAwesomeIcons.camera),
                 ),
               ),
               Positioned(
@@ -88,7 +103,6 @@ class _AccountState extends State<Account> with AutomaticKeepAliveClientMixin{
             onPressed: (){},
             child:Text("Term and Condition") ,
           ),
-
       ],),
     );
   }
@@ -96,4 +110,74 @@ class _AccountState extends State<Account> with AutomaticKeepAliveClientMixin{
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;
+
+
+Future<String> LoadData()async{
+  final result=await getCurrentUser();
+  await loadImage();
+  loaded=true;
+  print('Data Loaded Done');
+  setState(() {
+    
+  });
+  return result; 
+}
+
+
+  //Helper Functions
+  Future<String> getCurrentUser() async{
+    Userpreference pref=Userpreference();
+    final result= await pref.getUserprefrerence();
+    print(result);
+    CurrentUser=result;
+    user.uid=result;
+    return CurrentUser;
+  }
+
+  Future getImage() async {
+    final ImagePicker _picker=ImagePicker();
+    try{
+      final image=await _picker.pickImage(source:ImageSource.gallery);
+      if(image==null){
+        print("pick Image");
+      }
+      else{
+        _image=File(image.path);
+      }    
+    }on PlatformException catch (e){
+        print("Failed to pick image");
+      }
+  }
+
+  Future<bool> uploadImage() async{
+    FirebaseStorage firebaseStorage=FirebaseStorage.instance;
+    
+    try{
+    Reference storageref=firebaseStorage.ref().child(CurrentUser).child('Profile').child('Profile');
+    UploadTask uploadTask=storageref.putFile(_image);
+    TaskSnapshot taskSnapshot=await uploadTask.whenComplete(() => true);
+
+     return true;
+    }on FirebaseException catch (e){
+      return false;
+    }
+   
+  }
+
+  Future<bool> loadImage()async{
+    try{
+      final ref = FirebaseStorage.instance.ref().child(CurrentUser).child('Profile').child('Profile');
+      var url = await ref.getDownloadURL();
+      user.profile=url;
+    }on FirebaseException catch(e){
+      print('+++++++++++++++++++++++++++++++++++++++++++');
+      print(e);
+      final ref = FirebaseStorage.instance.ref().child('Defalut').child('profile.png');
+      var url = await ref.getDownloadURL();
+      user.profile=url;
+    }
+    
+    return true;
+  }
+
 }
