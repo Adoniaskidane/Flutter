@@ -37,6 +37,7 @@ class _WelcomPageState extends State<WelcomPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+      color: Colors.blue[900],
        child: Center(
          child: Column(
            mainAxisAlignment: MainAxisAlignment.center,

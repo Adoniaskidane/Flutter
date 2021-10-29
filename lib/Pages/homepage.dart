@@ -1,4 +1,6 @@
 // ignore_for_file: prefer_const_constructors, non_constant_identifier_names, avoid_print
+import 'dart:convert';
+
 import 'package:bunamedia/Pages/Nav/account.dart';
 import 'package:bunamedia/Pages/Nav/explore.dart';
 import 'package:bunamedia/Pages/Nav/home.dart';
@@ -53,7 +55,7 @@ class _HomePageState extends State<HomePage> {
     @override
     Widget build(BuildContext context) {
       print('Homepage Build');
-    print(ModalRoute.of(context)?.settings.arguments);
+    final res=(ModalRoute.of(context)?.settings.arguments);
     print("-----------");
     return Scaffold(
       appBar: AppBar(

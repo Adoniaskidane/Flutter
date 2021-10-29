@@ -6,3 +6,9 @@ class CUser{
   late String email;
   late String profile;
 }
+
+
+class argEmail{
+  String Email;
+  argEmail({required this.Email });
+}

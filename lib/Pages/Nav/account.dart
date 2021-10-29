@@ -20,9 +20,7 @@ class _AccountState extends State<Account> with AutomaticKeepAliveClientMixin{
 
   CUser user=CUser();
   bool loaded=false;
-  String CurrentUser='';
   late File _image;
-  //bool filePicked=false;
   final picker = ImagePicker();
 
 
@@ -79,7 +77,6 @@ class _AccountState extends State<Account> with AutomaticKeepAliveClientMixin{
                     await loadImage();
                     setState((){      
                       print(_image);
-                      //filePicked=true;
                     });
                   },
                   child: Icon(FontAwesomeIcons.camera),
@@ -128,10 +125,8 @@ Future<String> LoadData()async{
   Future<String> getCurrentUser() async{
     Userpreference pref=Userpreference();
     final result= await pref.getUserprefrerence();
-    print(result);
-    CurrentUser=result;
     user.uid=result;
-    return CurrentUser;
+    return result;
   }
 
   Future getImage() async {
@@ -153,10 +148,9 @@ Future<String> LoadData()async{
     FirebaseStorage firebaseStorage=FirebaseStorage.instance;
     
     try{
-    Reference storageref=firebaseStorage.ref().child(CurrentUser).child('Profile').child('Profile');
+    Reference storageref=firebaseStorage.ref().child(user.uid).child('Profile').child('Profile');
     UploadTask uploadTask=storageref.putFile(_image);
     TaskSnapshot taskSnapshot=await uploadTask.whenComplete(() => true);
-
      return true;
     }on FirebaseException catch (e){
       return false;
@@ -166,12 +160,13 @@ Future<String> LoadData()async{
 
   Future<bool> loadImage()async{
     try{
-      final ref = FirebaseStorage.instance.ref().child(CurrentUser).child('Profile').child('Profile');
+      final ref = FirebaseStorage.instance.ref().child(user.uid).child('Profile').child('Profile');
       var url = await ref.getDownloadURL();
       user.profile=url;
     }on FirebaseException catch(e){
       print('+++++++++++++++++++++++++++++++++++++++++++');
       print(e);
+      print('+++++++++++++++++++++++++++++++++++++++++++');
       final ref = FirebaseStorage.instance.ref().child('Defalut').child('profile.png');
       var url = await ref.getDownloadURL();
       user.profile=url;

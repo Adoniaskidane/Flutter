@@ -1,5 +1,6 @@
 import 'package:bunamedia/Pages/authentication/signin.dart';
 import 'package:bunamedia/Pages/authentication/signup.dart';
+import 'package:bunamedia/Pages/authentication/verify.dart';
 import 'package:bunamedia/Pages/homepage.dart';
 import 'package:bunamedia/Pages/loadpage.dart';
 import 'package:bunamedia/Pages/welcomepage.dart';
