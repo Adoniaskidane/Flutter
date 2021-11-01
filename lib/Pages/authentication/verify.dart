@@ -26,43 +26,111 @@ class _VerifyUserState extends State<VerifyUser> {
 
   Future<void> checkverify()async{
     final res= await authentication.checkVerifyStatus();
+    if(res){
+      Navigator.pop(context);
+    }
     isverify=res;
     print(email);
     print('The result of isverify $res');
-    setState(() {
-      
-    });
+
   }
   @override
   void initState() {
     // TODO: implement initState
-    checkverify();
+    //checkverify();
     super.initState();
    
   }
 
   @override
   Widget build(BuildContext context) {
-    return isverify==false?Scaffold(
-      body:Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        CircularProgressIndicator(),
-        ElevatedButton(
-            onPressed:()async{
-              await checkverify();
-              if(isverify==true)
-              {
-                Navigator.pop(context);
-              }
-            },
-            child:Text('Verified') 
-          )
-      ],
-    )):
-    Scaffold(
-      body: 
-          Center(child: Text('Success')),
+    return Scaffold(
+      
+      backgroundColor: Colors.blue[900],
+      body:Center(
+        child:Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            ElevatedButton(
+              onPressed: ()async{
+                isverify=await _authentication.checkVerifyStatus();
+                if(isverify){
+                  setState(() {
+                    print('User verfied');
+                    Navigator.pop(context);
+                  });
+                }
+              },
+              child: Text('Press here'))
+          ],
+        ) ,)
+      ,
+      /*body:FutureBuilder(
+        future: checkverify(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Center(child:Column(
+              mainAxisAlignment: MainAxisAlignment.center, 
+              children: [
+                Text("congratulations your Email is Verfied.",style: TextStyle(color: Colors.white,),),
+                ElevatedButton(onPressed: (){
+                  Navigator.pop(context); 
+                }, child: Text('Press to Continue'))
+              ],
+            ));
+          } else {
+            // We can show the loading view until the data comes back.
+            debugPrint('Step 1, build loading widget');
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      )
+      */
+      /*body: StreamBuilder(
+        initialData:'Working',
+        stream: _authentication.streamVerifyStatsu(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return snapshot.hasData==false?
+              CircularProgressIndicator():
+              Center(child:Column(
+              mainAxisAlignment: MainAxisAlignment.center, 
+              children: [
+                Text("congratulations your Email is Verfied.",style: TextStyle(color: Colors.white,),),
+                ElevatedButton(onPressed: (){
+                  Navigator.pop(context); 
+                }, child: Text('Press to Continue'))
+              ],
+            ));
+          } else {
+            // We can show the loading view until the data comes back.
+            debugPrint('Step 1, build loading widget');
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      ),*/
+      
+      /*FutureBuilder(
+        future: checkverify(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return Center(child:Column(
+              mainAxisAlignment: MainAxisAlignment.center, 
+              children: [
+                Text("congratulations your Email is Verfied.",style: TextStyle(color: Colors.white,),),
+                ElevatedButton(onPressed: (){
+                  Navigator.pop(context); 
+                }, child: Text('Press to Continue'))
+              ],
+            ));
+          } else {
+            // We can show the loading view until the data comes back.
+            debugPrint('Step 1, build loading widget');
+            return Center(child: CircularProgressIndicator());
+          }
+        },
+      )*/
     );
   }
 }

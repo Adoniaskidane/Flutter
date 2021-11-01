@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors, avoid_print
+import 'package:bunamedia/Pages/authentication/verify.dart';
 import 'package:bunamedia/Pages/services/auth.dart';
 import 'package:bunamedia/Pages/services/pref.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -105,8 +106,16 @@ class _SignInPageState extends State<SignInPage> {
                         {
                           print("Currrent user uid: "+user!.uid.toString());
                           print("LoggedIn successfuly");
-                          keepLogged(user.uid);
-                          Navigator.pushReplacementNamed(context,'/home',arguments: {'logged': false});
+                          
+                          final status=await _authentication.checkVerifyStatus();
+                          if(status){
+                            keepLogged(user.uid);
+                            Navigator.pushReplacementNamed(context,'/home',arguments: {'logged': false});
+                          }else{
+                            await Navigator.push(context,
+                                    MaterialPageRoute(builder: (context) => VerifyUser(authentication: _authentication,email: _email.text,)));
+                            Navigator.pushReplacementNamed(context,'/home',arguments: {'logged': false});
+                          }  
                         }
                         else{
                           print('Failed to LogIn successfuly');
