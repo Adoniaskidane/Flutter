@@ -1,4 +1,4 @@
-package com.example.bunamedia
+package com.example.buna
 
 import io.flutter.embedding.android.FlutterActivity
 

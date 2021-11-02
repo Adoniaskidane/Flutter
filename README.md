@@ -1,4 +1,4 @@
-# bunamedia
+# buna
 
 A new Flutter project.
 
