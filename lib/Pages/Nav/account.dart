@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
+import 'package:bunamedia/Pages/services/auth.dart';
 import 'package:bunamedia/Pages/services/user.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 
 class Account extends StatefulWidget {
@@ -19,10 +21,11 @@ class Account extends StatefulWidget {
 class _AccountState extends State<Account> with AutomaticKeepAliveClientMixin{
 
   CUser user=CUser();
+  
   bool loaded=false;
   late File _image;
   final picker = ImagePicker();
-
+  UserAuthentication _authentication=UserAuthentication(FirebaseAuth.instance);
 
   @override
   void initState(){
@@ -40,67 +43,89 @@ class _AccountState extends State<Account> with AutomaticKeepAliveClientMixin{
   }
 
   Widget Profile(String user,String profile){
-    return Container(
-      child: Column(
-        children: [
-          Container(
-            height: MediaQuery.of(context).size.height*0.05,
-            width:MediaQuery.of(context).size.width,
-            child: Text(user),
-            padding: EdgeInsets.all(10),
-            color: Colors.blue,
-          ),
-          Stack(
-            children: [
+    return SafeArea(
+      child: Container(
+        child: Column(
+          children: [
               Container(
-                height: MediaQuery.of(context).size.height*0.4,
-                color: Colors.purple,
+                alignment: Alignment.center,
+                height: MediaQuery.of(context).size.height*.05,
+                width:  MediaQuery.of(context).size.width,
+                color: Colors.blue[900],
+                child: Text("BunaMedia",
+                    style :TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Times',
+                      fontSize: 20
+                    ),
+                  ),
               ),
-              Positioned(
-                left: MediaQuery.of(context).size.width*0.3,
-                top:MediaQuery.of(context).size.height*0.05 ,
-                child: CircleAvatar(
-                  backgroundColor:Colors.white,
-                  child:ClipRRect(borderRadius:BorderRadius.circular(70),child:Image.network(profile,fit: BoxFit.fill,)),
-                  radius: 70,
+            Stack(
+              children: [
+                Container(
+                  height: MediaQuery.of(context).size.height*0.4,
+                  color: Colors.purple,
                 ),
-              ),
-         
-              Positioned(
-                left: MediaQuery.of(context).size.width*0.4,
-                top:MediaQuery.of(context).size.height*0.2 ,
-                child: ElevatedButton(
-                  onPressed: ()async{
-                    print("pressed");
-                    await getImage();
-                    await uploadImage();
-                    await loadImage();
-                    setState((){      
-                      print(_image);
-                    });
-                  },
-                  child: Icon(FontAwesomeIcons.camera),
+                Positioned(
+                  left: MediaQuery.of(context).size.width*0.3,
+                  top:MediaQuery.of(context).size.height*0.05 ,
+                  child: CircleAvatar(
+                    backgroundImage:NetworkImage(profile) ,
+                    radius: 70,
+                  ),
                 ),
+           
+                Positioned(
+                  left: MediaQuery.of(context).size.width*0.4,
+                  top:MediaQuery.of(context).size.height*0.2 ,
+                  child: ElevatedButton(
+                    onPressed: ()async{
+                      print("pressed");
+                      await getImage();
+                      await uploadImage();
+                      await loadImage();
+                      setState((){      
+                        print(_image);
+                      });
+                    },
+                    child: Icon(FontAwesomeIcons.camera),
+                  ),
+                ),
+                Positioned(
+                  left: MediaQuery.of(context).size.width*0.4,
+                  top:MediaQuery.of(context).size.height*0.3 ,
+                  child: Text('First Last'),
+                ),
+              ],
+            ),
+            Container(
+              height: MediaQuery.of(context).size.height*0.1 ,
+              width: MediaQuery.of(context).size.width,
+              color: Colors.lightBlue[100],
+              child: Center(child: Text("List view of User Post")),
+            ),
+            SizedBox(height: 20,),
+            ElevatedButton(
+              onPressed: (){},
+              child:Text("Term and Condition") ,
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.red,
+                fixedSize: Size.fromWidth(150),
               ),
-              Positioned(
-                left: MediaQuery.of(context).size.width*0.4,
-                top:MediaQuery.of(context).size.height*0.3 ,
-                child: Text('First Last'),
-              ),
-            ],
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height*0.1 ,
-            width: MediaQuery.of(context).size.width,
-            color: Colors.lightBlue[100],
-            child: Center(child: Text("List view of User Post")),
-          ),
-          SizedBox(height: 20,),
-          ElevatedButton(
-            onPressed: (){},
-            child:Text("Term and Condition") ,
-          ),
-      ],),
+                onPressed: ()async{
+                  final result=await _authentication.SignOut();
+                  if(result){
+                    keepLoggedOut();
+                    Navigator.pushReplacementNamed(context,'/');
+                  }
+    
+                },
+                child:Text("SignOut"),
+              )
+        ],),
+      ),
     );
   }
 
@@ -173,6 +198,11 @@ Future<String> LoadData()async{
     }
     
     return true;
+  }
+
+  void keepLoggedOut()async{
+    Userpreference pref=Userpreference();
+    await pref.removeUserpreference();
   }
 
 }

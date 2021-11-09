@@ -30,6 +30,17 @@ class UserAuthentication{
     }
 
   }
+  Future<bool> SignOut() async{
+    try{
+      await _firebaseAuth.signOut();
+    return true;
+    }on FirebaseException catch(e){
+      print(e.message);
+      return false;
+    }
+
+  }
+
 
   Future<String> CurrentUid()async{
       return _firebaseAuth.currentUser!.uid;

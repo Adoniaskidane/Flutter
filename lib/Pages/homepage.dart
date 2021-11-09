@@ -1,9 +1,9 @@
 // ignore_for_file: prefer_const_constructors, non_constant_identifier_names, avoid_print
 import 'dart:convert';
-
 import 'package:bunamedia/Pages/Nav/account.dart';
 import 'package:bunamedia/Pages/Nav/explore.dart';
 import 'package:bunamedia/Pages/Nav/home.dart';
+import 'package:bunamedia/Pages/Nav/network.dart';
 import 'package:bunamedia/Pages/services/pref.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
     print("HomePage init Done");
     } 
       PageController _pageController=PageController();
-      List<Widget> _screens=[Home(),Explore(),Home(),Account()];
+      List<Widget> _screens=[Home(),Network(),Explore(),Account()];
       int currentPage=0;
 
       void _onpagechanged(int index){
@@ -58,9 +58,6 @@ class _HomePageState extends State<HomePage> {
     final res=(ModalRoute.of(context)?.settings.arguments);
     print("-----------");
     return Scaffold(
-      appBar: AppBar(
-        title: Text("HomePage"),
-      ),
       body:PageView(
         controller:_pageController ,
         children:_screens,
