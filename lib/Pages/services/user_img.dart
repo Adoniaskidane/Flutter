@@ -2,6 +2,8 @@
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 
 class UserImage
 {
@@ -28,5 +30,19 @@ class UserImage
       catch (e){
         return null;
       }
+  }
+
+  Future<String?> UploadPostImage({required String uid,required String ref,required File images}) async{
+    FirebaseStorage firebaseStorage=FirebaseStorage.instance;
+    
+    try{
+    Reference storageref=firebaseStorage.ref().child(uid).child(ref).child('image');
+    UploadTask uploadTask=storageref.putFile(images);
+    TaskSnapshot taskSnapshot=await uploadTask.whenComplete(() => true);
+    return await taskSnapshot.ref.getDownloadURL();
+    }on FirebaseException catch (e){
+      return null;
+    }
+   
   }
 }

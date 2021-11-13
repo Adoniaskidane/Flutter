@@ -1,28 +1,36 @@
 // ignore_for_file: prefer_const_constructors
 import 'dart:io';
+import 'package:bunamedia/Pages/services/db.dart';
 import 'package:bunamedia/Pages/services/user_img.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:bunamedia/Pages/services/user.dart';
 import 'package:flutter/material.dart';
 
 class PostPage extends StatefulWidget {
-  const PostPage({ Key? key }) : super(key: key);
+  final CUser user;
+  const PostPage({ Key? key,required this.user }) : super(key: key);
 
   @override
-  _PostPageState createState() => _PostPageState();
+  _PostPageState createState() => _PostPageState(cuser: user);
 }
 
 class _PostPageState extends State<PostPage> {
 
+  //constructor
+  _PostPageState({required this.cuser});
+
+  CUser cuser=CUser();
   TextEditingController _postText=TextEditingController();
   late File _postImage;
   bool _ispickImage=false;
   UserImage _pickImage=UserImage();
-
+  DateTime _now = DateTime.now();
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Post'),
+        title: Text(cuser.username),
         centerTitle: true,
       ),
       body: Container(
@@ -89,9 +97,7 @@ class _PostPageState extends State<PostPage> {
                     _ispickImage=false;
                   }
                   setState(() {
-                    
                   });
-                  
                 },
                 child:Icon(FontAwesomeIcons.camera)),
 
@@ -120,20 +126,26 @@ class _PostPageState extends State<PostPage> {
                 primary: Colors.green,
                 fixedSize:Size(100, 50), 
               ),
-              onPressed: (){
-                if(_ispickImage){
+              onPressed: ()async{
+                Database db=Database(uid: cuser.uid);
+                if(_ispickImage && _postText.text.isNotEmpty){
+                  print('Text and  image');
                   print('Posted text: ${_postText.text}');
-                  if(_postImage.path.isEmpty)
-                  {
-                    print('No picture');
-                  }
-                  else{
-                    print('Has a picture');
+                  final res=await db.InsertPost(text: _postText.text,img: _postImage);
+                  if(res){
                   }
                 }
-                else{
-                 print('Posted text: ${_postText.text}');
+                //Just Text
+                else if(_postText.text.isNotEmpty){
+                 print('Posted only text: ${_postText.text}');
+                  await db.InsertPost(text: _postText.text);
                 }
+                //Just Image
+                else if(_ispickImage){
+                  print('Just image');
+                  await db.InsertPost(img: _postImage);
+                }
+                Navigator.pop(context);
               },
               child:Text("POST") ,
           ))

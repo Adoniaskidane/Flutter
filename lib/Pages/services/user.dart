@@ -42,8 +42,6 @@ class BuildCUser{
     }
   }
 
-
-
   Future<bool> loadImage()async{
     try{
       final ref = FirebaseStorage.instance.ref().child(user.uid).child('Profile').child('Profile');
@@ -60,4 +58,18 @@ class BuildCUser{
     return true;
   }
 
+}
+
+
+
+class UserPost{
+  UserPost({required this.isImage,required this.isText,required this.time,required this.profile});
+    bool isImage;
+    bool isText;
+    String imgUrl="";
+    String text="";
+    DateTime time;
+    String postId="";
+    String uid="";
+    CUser profile;
 }

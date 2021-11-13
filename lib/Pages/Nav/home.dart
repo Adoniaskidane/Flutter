@@ -7,6 +7,7 @@ import 'package:bunamedia/Pages/services/user.dart';
 import 'package:bunamedia/Pages/services/user_img.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
 
   CUser _CurrentUser=CUser();
-  DateTime _now = DateTime.now();
   UserAuthentication _authentication=UserAuthentication(FirebaseAuth.instance);
   bool initialization=false;
 
@@ -29,6 +29,11 @@ class _HomeState extends State<Home> {
   late File _postImage;
   bool _ispickImage=false;
   UserImage _pickImage=UserImage();
+  //For the feeding section variables 
+  final Posts=['userID1','userID2','userID3','userID4','userID5','userID6','userID1','userID2','userID3','userID4','userID5','userID6','userID1','userID2','userID3','userID4','userID5','userID6'];
+  RefreshController refreshController=RefreshController();
+  List<UserPost> userpost=[];
+  int size=3;
 
 
   @override
@@ -39,12 +44,14 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+
     return SafeArea(
       child: Scaffold(
         body:initialization==true? Container(
           height: MediaQuery.of(context).size.height,
           width:  MediaQuery.of(context).size.width,
           child:Column(
+            //mainAxisAlignment: MainAxisAlignment.start,
             children:[
               Container(
                 alignment: Alignment.center,
@@ -108,13 +115,7 @@ class _HomeState extends State<Home> {
                           primary: Colors.blue.shade900,
                           fixedSize: Size.fromWidth(120),
                         ),
-                        /*
-                        onPressed: ()=>showModalBottomSheet(
-                          backgroundColor:Colors.transparent,
-                          isScrollControlled: true,
-                          context: context,
-                          builder:(context)=>PostingPage()),*/
-                        onPressed: (){Navigator.push(context, MaterialPageRoute(builder: (context) => PostPage()));},
+                        onPressed: (){Navigator.push(context, MaterialPageRoute(builder: (context) => PostPage(user: _CurrentUser,)));},
                         child:Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -133,7 +134,44 @@ class _HomeState extends State<Home> {
                     ],
           ),
               ),
-  
+
+              //This is the feeding part of the page:
+              
+              Container(
+                height:MediaQuery.of(context).size.height*0.699,
+                //color: Colors.blue,
+                child:SmartRefresher(
+                  onLoading: ()async{
+                        Database db=Database(uid: _CurrentUser.uid);
+                        size+=1;
+                        print(size);
+                        userpost=await db.getFeedingData(size);
+                    refreshController.loadComplete();
+                    setState(() {
+                      
+                    });
+                  },
+                  onRefresh: ()async{
+                        Database db=Database(uid: _CurrentUser.uid);
+                        size+=1;
+                        userpost=await db.getFeedingData(size);
+                    refreshController.refreshCompleted();
+                    setState(() {
+                      
+                    });
+                  },
+                  controller: refreshController,
+                  enablePullUp: true,
+                  child: ListView.builder(
+                    itemCount: userpost.length,
+                    itemBuilder:(context,index){
+                      final currentdata=userpost[index];
+                      return CustomCard(currentdata,index);
+          
+                    }
+                  ),
+                ),
+              )
             ],
           )
          
@@ -149,6 +187,7 @@ class _HomeState extends State<Home> {
     print('current user $uid');
     Database db=Database(uid: uid);
     _CurrentUser=await db.getUser();
+    userpost=await db.getFeedingData(size);
     setState(() {
       initialization=true;
     });
@@ -159,131 +198,91 @@ class _HomeState extends State<Home> {
     return result;
   }
 
-
-
-  //Post page widget
-  Widget PostingPage(){
-  return DraggableScrollableSheet(
-    
-    initialChildSize:0.9,
-    minChildSize: 0.5,
-    maxChildSize: 1,
-    builder: (_,controller)=>Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(50)
-        ),
-      ),
-      //user list view so that it will be scrollable and assign the controller from drabblescrollablesheet
-
-      child: Column(
+  Widget CustomCard(UserPost currentdata,index){
+    return Container(
+    //height:MediaQuery.of(context).size.height*0.5,
+      child:Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 50,),
+          HeaderProfile(currentdata.profile),
           Container(
-            decoration:BoxDecoration(
-              color: Colors.white,
-              border:Border(
-                bottom: BorderSide(
-                  color:Colors.blue,
-                  width: 3,
-                )
-              )
-            ),
-            
-            padding:EdgeInsets.symmetric(
-              vertical: 10,
-              horizontal: 20
-            ),
-            height:MediaQuery.of(context).size.height*0.5,
             width: MediaQuery.of(context).size.width*1,
-            //color: Colors.white,
-            child:TextField(
-              controller: _postText,
-              keyboardType: TextInputType.text,
-              maxLines: 20,
-              style: TextStyle(
-                fontSize: 20,
-                height: 1.5
-              ),
-              decoration: InputDecoration(
-              hintStyle: TextStyle(fontSize: 17),
-              hintText: 'Write something here ...',
-              border: InputBorder.none,
-            ),
-            )
-          ),
-        
-          Row(
-            children: [
-              ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                primary: Colors.blue,
-                fixedSize:Size(100, 50), 
-              ),
-                onPressed: ()async{
-                  try{
-                  _postImage=(await _pickImage.getImage())!;
-                    _ispickImage=true;
-                    setState(() {
-                      print('Image selected');
-                    });
-                  }catch(e){
-                    _ispickImage=false;
-                  }
-                  setState(() {
-                    
-                  });
-                  
-                },
-                child:Icon(FontAwesomeIcons.camera)),
-
-              GestureDetector(
-                child: Container(
-                  height: 50,
-                  width: 70,
-                  child: _ispickImage==true?
-                  Image.file(_postImage,fit: BoxFit.cover,):
-                  Icon(FontAwesomeIcons.images,color: Colors.black,),
-                ),
-                onTap: (){
-                  _ispickImage=false;
-                  setState(() {
-                    print('Gesture');
-                  });
-                },
-              )
-            ],
+            child: currentdata.isImage?
+            Container(
+            height: MediaQuery.of(context).size.height*0.5,
+            child: Image(image:NetworkImage(currentdata.imgUrl),fit: BoxFit.cover,)):
+            Container(),
           ),
           SizedBox(height: 10,),
           Container(
-            alignment: Alignment.bottomRight,
-            child:ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                primary: Colors.green,
-                fixedSize:Size(100, 50), 
+            child: currentdata.isText?
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
+              child:Text(currentdata.text,
+              style: TextStyle(
+                fontSize: 18,
               ),
-              onPressed: (){
-                if(_ispickImage){
-                  print('Posted text: ${_postText.text}');
-                  if(_postImage.path.isEmpty)
-                  {
-                    print('No picture');
-                  }
-                  else{
-                    print('Has a picture');
-                  }
-                }
-                else{
-                 print('Posted text: ${_postText.text}');
-                }
-              },
-              child:Text("POST") ,
-          ))
+            )):
+            Container(),
+          ),
+          ListTile(
+            subtitle: Text(currentdata.time.toString()),
+          ),
+          ReactionButtons(currentdata, index)
         ],
       ),
-  ));
+    );
   }
+
+  Widget HeaderProfile(CUser user){
+    return Container(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                child: CircleAvatar(
+                  radius: 20,
+                  backgroundImage:NetworkImage(user.profile),
+                ),
+              ),
+              SizedBox(width: 10,),
+              Text(user.username),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+            child: Icon(FontAwesomeIcons.chevronDown),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget ReactionButtons(UserPost currentdata,index){
+       return     Container(
+            child:Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
+              children: [
+                ElevatedButton(onPressed: (){print(index);}, child: Icon(FontAwesomeIcons.heart),
+                style: ElevatedButton.styleFrom(primary: Colors.red[200]),),
+                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.heartBroken),
+                style: ElevatedButton.styleFrom(primary: Colors.red,),),
+                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.smile),
+                style: ElevatedButton.styleFrom(primary: Colors.yellow,),),
+                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.thumbsUp),
+                style: ElevatedButton.styleFrom(primary: Colors.green),),
+                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.thumbsDown),
+                style: ElevatedButton.styleFrom(primary: Colors.black,),),
+                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.comment),
+                style: ElevatedButton.styleFrom(primary: Colors.blue),),
+              ],)
+          );
+  }
+  
+
 }
 
 
