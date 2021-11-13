@@ -20,6 +20,7 @@ class _HomePageState extends State<HomePage> {
     Userpreference pref=Userpreference();
     await pref.removeUserpreference();
   }
+
   void getCurrentUser() async{
     Userpreference pref=Userpreference();
     final result= await pref.getUserprefrerence();
@@ -29,6 +30,7 @@ class _HomePageState extends State<HomePage> {
       print("SetState");
     });
   }
+  
   @override
   void initState() {
     // TODO: implement initState
@@ -74,7 +76,7 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.comments,color: currentPage==1?Colors.blue:Colors.grey[600]),
-            title: Text("Market",style: TextStyle(color: currentPage==1?Colors.blue:Colors.grey[600]),)
+            title: Text("Network",style: TextStyle(color: currentPage==1?Colors.blue:Colors.grey[600]),)
           ),
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.users,color: currentPage==2?Colors.blue:Colors.grey[600],),

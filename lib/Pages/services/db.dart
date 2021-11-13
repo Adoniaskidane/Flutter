@@ -11,6 +11,8 @@ class Database{
 
   String uid;
   CUser _user=CUser();
+  //For Explore section getting Users
+  List<CUser> Collection_users=[];
 
   Database({required this.uid});
   
@@ -20,7 +22,7 @@ class Database{
     await loadImage();
     return _user;
   }
-
+  //For the Main user
   Future<bool> retriveUserData()async{
     _user.uid=uid;
       CollectionReference users = FirebaseFirestore.instance.collection('Users');
@@ -39,9 +41,47 @@ class Database{
 
       return res;
   }
+  //For the other Users
+  Future<CUser?> BuildEachUser(String UserID)async{
+      CUser c_user=CUser();
+      CollectionReference users = FirebaseFirestore.instance.collection('Users');
+      final profilepic=await loadCollectionUserImage(UserID);
+      final res= users.doc(UserID).get().then((value)async{
+        if(value.exists){
+          c_user.profile=profilepic;
+          c_user.uid=UserID;
+          c_user.username=value.get('Username');
+          c_user.first=value.get('Firstname');
+          c_user.last=value.get('Lastname');
+          c_user.email=value.get('Email');
+          print(c_user.uid);
+          print(c_user.profile); 
+          return c_user;
+        }else{
+         return null;
+        }
+        
+      });
+      return res;
+  }
+  //For the other users 
+  Future<String> loadCollectionUserImage(String UserID)async{
+    try{
+      final ref = FirebaseStorage.instance.ref().child(UserID).child('Profile').child('Profile');
+      var url = await ref.getDownloadURL();
+      return url;
+    }on FirebaseException catch(e){
+      print('+++++++++++++++++++++++++++++++++++++++++++');
+      print(e);
+      print('+++++++++++++++++++++++++++++++++++++++++++');
+      final ref = FirebaseStorage.instance.ref().child('Defalut').child('profile.png');
+      var url = await ref.getDownloadURL();
+      return url;
+    }    
+  }
 
-
-    Future<bool> loadImage()async{
+//This is for the main user
+Future<bool> loadImage()async{
     try{
       final ref = FirebaseStorage.instance.ref().child(uid).child('Profile').child('Profile');
       var url = await ref.getDownloadURL();
@@ -122,7 +162,6 @@ class Database{
       final id =b.reference.parent.parent!.id;
       Database db=Database(uid: id);
       CUser profile=await db.getUser();
-      print('This is the username ${profile.username}');
       final postid=b.reference.id;
       final isImage=b.get('isImage');
       final isText=b.get('isText');
@@ -147,6 +186,25 @@ class Database{
 
   print('${userposts.length}');
   return userposts;
-    }
+  }
 
+  Future<bool> getCollectionUsers(int size)async{
+
+    CollectionReference users = FirebaseFirestore.instance.collection('Users');
+
+    final userSnapshot=await users.limit(size).get();
+    for (var element in userSnapshot.docs) {
+
+      if(element.id!=uid)
+        {
+        CUser? user_data=await BuildEachUser(element.id);
+        if(user_data!=null){
+        Collection_users.add(user_data);
+        print(user_data.profile);
+        }else{
+        print('noting');
+      }}
+    }
+    return true; 
+  }
 }

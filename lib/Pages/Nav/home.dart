@@ -145,8 +145,15 @@ class _HomeState extends State<Home> {
                         Database db=Database(uid: _CurrentUser.uid);
                         size+=1;
                         print(size);
+                        final currently=userpost.length;
                         userpost=await db.getFeedingData(size);
-                    refreshController.loadComplete();
+                        size=userpost.length;
+                        if(currently==size){
+                          refreshController.loadNoData();
+                        }else{
+                          refreshController.loadComplete();
+                        }
+
                     setState(() {
                       
                     });
@@ -154,8 +161,14 @@ class _HomeState extends State<Home> {
                   onRefresh: ()async{
                         Database db=Database(uid: _CurrentUser.uid);
                         size+=1;
+                        final currently=userpost.length;
                         userpost=await db.getFeedingData(size);
-                    refreshController.refreshCompleted();
+                        size=userpost.length;
+                        if(currently==size){
+                          refreshController.refreshToIdle();
+                        }else{
+                          refreshController.refreshCompleted();
+                        }
                     setState(() {
                       
                     });
@@ -249,7 +262,12 @@ class _HomeState extends State<Home> {
                 ),
               ),
               SizedBox(width: 10,),
-              Text(user.username),
+              Text(user.username,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                ),
+              ),
             ],
           ),
           Padding(
