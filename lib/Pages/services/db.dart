@@ -24,7 +24,7 @@ class Database{
   }
   //For the Main user
   Future<bool> retriveUserData()async{
-    _user.uid=uid;
+      _user.uid=uid;
       CollectionReference users = FirebaseFirestore.instance.collection('Users');
       final res= users.doc(uid).get().then((value){
         if(value.exists){
@@ -191,7 +191,6 @@ Future<bool> loadImage()async{
   Future<bool> getCollectionUsers(int size)async{
 
     CollectionReference users = FirebaseFirestore.instance.collection('Users');
-
     final userSnapshot=await users.limit(size).get();
     for (var element in userSnapshot.docs) {
 

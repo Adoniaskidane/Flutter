@@ -183,15 +183,17 @@ class _SignUpPageState extends State<SignUpPage> {
                           final result=await _authentication.SignUp(_email.text, _password.text);
                           if(result){
                           print('Successfuly SignUp');
-                          await _authentication.sendEmail(_email.text);
+                          
                           //_authentication.VerifyEmail(_email.text);
                           //await Navigator.pushNamed(context,'/verify',arguments: {'Email':_email.text});
-                          await Navigator.push(context,
-                                    MaterialPageRoute(builder: (context) => VerifyUser(authentication: _authentication,email: _email.text,)));
+                          
                           final useruid= await _authentication.CurrentUid();
                           Database db=Database(uid:useruid );
                           db.InsertUserData(_username.text,_Firstname.text,_Lastname.text,_email.text);
                           print('Inserted on the DB');
+                          await _authentication.sendEmail(_email.text);
+                          await Navigator.push(context,
+                                    MaterialPageRoute(builder: (context) => VerifyUser(authentication: _authentication,email: _email.text,)));
                           Navigator.pop(context);}
                         }else
                         { 

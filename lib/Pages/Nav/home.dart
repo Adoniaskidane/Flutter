@@ -217,6 +217,7 @@ class _HomeState extends State<Home> {
       child:Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          //Divider(color: Colors.black,),
           HeaderProfile(currentdata.profile),
           Container(
             width: MediaQuery.of(context).size.width*1,
@@ -241,7 +242,8 @@ class _HomeState extends State<Home> {
           ListTile(
             subtitle: Text(currentdata.time.toString()),
           ),
-          ReactionButtons(currentdata, index)
+          ReactionButtons(currentdata, index),
+          Divider(color: Colors.black,)
         ],
       ),
     );
@@ -292,10 +294,11 @@ class _HomeState extends State<Home> {
                 style: ElevatedButton.styleFrom(primary: Colors.yellow,),),
                 ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.thumbsUp),
                 style: ElevatedButton.styleFrom(primary: Colors.green),),
-                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.thumbsDown),
-                style: ElevatedButton.styleFrom(primary: Colors.black,),),
-                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.comment),
-                style: ElevatedButton.styleFrom(primary: Colors.blue),),
+                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.thumbsDown,color: Colors.black,),
+                style: ElevatedButton.styleFrom(primary: Colors.white,),),
+                //ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.comment),
+                //style: ElevatedButton.styleFrom(primary: Colors.blue,elevation: 0),),
+                MaterialButton(onPressed: (){},child:Icon(FontAwesomeIcons.comment,color: Colors.blue,))
               ],)
           );
   }

@@ -73,3 +73,10 @@ class UserPost{
     String uid="";
     CUser profile;
 }
+
+class messages{
+  messages({required this.userID,required,required this.message,required this.time});
+  String userID;
+  String message;
+  DateTime time;
+}

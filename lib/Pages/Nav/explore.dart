@@ -58,7 +58,7 @@ class _ExploreState extends State<Explore>  with AutomaticKeepAliveClientMixin{
                           print('From explore ${user.profile}');
                           return UserExplore(user);
                         })),
-                ),):CircularProgressIndicator()
+                ),):Center(child: CircularProgressIndicator())
               ]
             )
           )
@@ -79,7 +79,7 @@ class _ExploreState extends State<Explore>  with AutomaticKeepAliveClientMixin{
     });
     return result;
   }
-
+  
   @override
   // TODO: implement wantKeepAlive
   bool get wantKeepAlive => true;

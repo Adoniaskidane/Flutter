@@ -27,7 +27,6 @@ class _LoadScreenState extends State<LoadScreen> {
       Navigator.popAndPushNamed(context,'/welcome');
     }
     });
-    
   }
 
   @override
