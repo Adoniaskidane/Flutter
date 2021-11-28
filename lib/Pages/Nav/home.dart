@@ -3,6 +3,7 @@ import 'package:bunamedia/Pages/Nav/posts.dart';
 import 'package:bunamedia/Pages/services/auth.dart';
 import 'package:bunamedia/Pages/services/db.dart';
 import 'package:bunamedia/Pages/services/pref.dart';
+import 'package:bunamedia/Pages/services/reaction.dart';
 import 'package:bunamedia/Pages/services/user.dart';
 import 'package:bunamedia/Pages/services/user_img.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,10 +31,12 @@ class _HomeState extends State<Home> {
   bool _ispickImage=false;
   UserImage _pickImage=UserImage();
   //For the feeding section variables 
-  final Posts=['userID1','userID2','userID3','userID4','userID5','userID6','userID1','userID2','userID3','userID4','userID5','userID6','userID1','userID2','userID3','userID4','userID5','userID6'];
   RefreshController refreshController=RefreshController();
   List<UserPost> userpost=[];
-  int size=3;
+  int size=5;
+
+  //Reaction
+  late UserReaction _userReaction;
 
 
   @override
@@ -51,7 +54,6 @@ class _HomeState extends State<Home> {
           height: MediaQuery.of(context).size.height,
           width:  MediaQuery.of(context).size.width,
           child:Column(
-            //mainAxisAlignment: MainAxisAlignment.start,
             children:[
               Container(
                 alignment: Alignment.center,
@@ -143,8 +145,8 @@ class _HomeState extends State<Home> {
                 child:SmartRefresher(
                   onLoading: ()async{
                         Database db=Database(uid: _CurrentUser.uid);
-                        size+=1;
-                        print(size);
+                        size+=5;
+                        //print(size);
                         final currently=userpost.length;
                         userpost=await db.getFeedingData(size);
                         size=userpost.length;
@@ -160,7 +162,7 @@ class _HomeState extends State<Home> {
                   },
                   onRefresh: ()async{
                         Database db=Database(uid: _CurrentUser.uid);
-                        size+=1;
+                        size+=5;
                         final currently=userpost.length;
                         userpost=await db.getFeedingData(size);
                         size=userpost.length;
@@ -179,6 +181,8 @@ class _HomeState extends State<Home> {
                     itemCount: userpost.length,
                     itemBuilder:(context,index){
                       final currentdata=userpost[index];
+                      print(currentdata.reaction.isreacted);
+                      //print('here  are the data: ${currentdata.postId}');
                       return CustomCard(currentdata,index);
           
                     }
@@ -201,6 +205,7 @@ class _HomeState extends State<Home> {
     Database db=Database(uid: uid);
     _CurrentUser=await db.getUser();
     userpost=await db.getFeedingData(size);
+    _userReaction=UserReaction(user: uid);
     setState(() {
       initialization=true;
     });
@@ -240,7 +245,13 @@ class _HomeState extends State<Home> {
             Container(),
           ),
           ListTile(
-            subtitle: Text(currentdata.time.toString()),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(currentdata.time.toString().substring(11,16)),
+                Text(currentdata.time.toString().substring(0,11)),
+              ],
+            ),
           ),
           ReactionButtons(currentdata, index),
           Divider(color: Colors.black,)
@@ -286,19 +297,101 @@ class _HomeState extends State<Home> {
             child:Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly, 
               children: [
-                ElevatedButton(onPressed: (){print(index);}, child: Icon(FontAwesomeIcons.heart),
-                style: ElevatedButton.styleFrom(primary: Colors.red[200]),),
-                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.heartBroken),
-                style: ElevatedButton.styleFrom(primary: Colors.red,),),
-                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.smile),
-                style: ElevatedButton.styleFrom(primary: Colors.yellow,),),
-                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.thumbsUp),
-                style: ElevatedButton.styleFrom(primary: Colors.green),),
-                ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.thumbsDown,color: Colors.black,),
-                style: ElevatedButton.styleFrom(primary: Colors.white,),),
-                //ElevatedButton(onPressed: (){}, child: Icon(FontAwesomeIcons.comment),
-                //style: ElevatedButton.styleFrom(primary: Colors.blue,elevation: 0),),
-                MaterialButton(onPressed: (){},child:Icon(FontAwesomeIcons.comment,color: Colors.blue,))
+                Column(
+                  children: [
+                    MaterialButton(
+                    child:Icon(FontAwesomeIcons.heart,color: Colors.red[200],),
+                    minWidth: MediaQuery.of(context).size.width*.16,
+                    color:currentdata.reaction.type=='Heart'? Colors.red:Colors.white,
+                    elevation: 0,
+                    onPressed: ()async{
+                    await _userReaction.ReactingMethod(currentdata.postId,currentdata.uid,'Heart');
+                     ReactionData reactionData=await _userReaction.reactionData(currentdata.postId,currentdata.uid);
+                     currentdata.reaction=reactionData;
+                     setState(() {
+                       //print(currentdata.reaction.hearted);
+                       //print(reactionData.hearted);
+                     });
+                    },
+                    ),
+                    Text(currentdata.reaction.hearted.toString()),
+                  ],
+                ),
+                Column(
+                  children: [
+                    MaterialButton(
+                    child:Icon(FontAwesomeIcons.heartBroken,color: Colors.red,),
+                    minWidth: MediaQuery.of(context).size.width*.16,
+                    color: currentdata.reaction.type=='heartBroken'?Colors.red[100]:Colors.white,
+                    elevation: 0,
+                    onPressed: ()async{
+                    await _userReaction.ReactingMethod(currentdata.postId,currentdata.uid,'heartBroken');
+                    ReactionData reactionData=await _userReaction.reactionData(currentdata.postId,currentdata.uid);
+                     currentdata.reaction=reactionData;
+                     setState(() {
+                       
+                     });
+                    },
+                    ),
+                    Text(currentdata.reaction.heartBorken.toString()),
+                  ],
+                ),
+                Column(
+                  children: [
+                    MaterialButton(
+                    child:Icon(FontAwesomeIcons.smile,color: Colors.yellow,),
+                    minWidth: MediaQuery.of(context).size.width*.16,
+                    color: currentdata.reaction.type=='smile'?Colors.yellow[100]:Colors.white,
+                    elevation: 0,
+                    onPressed: ()async{
+                      await _userReaction.ReactingMethod(currentdata.postId,currentdata.uid,'smile');
+                      ReactionData reactionData=await _userReaction.reactionData(currentdata.postId,currentdata.uid);
+                      currentdata.reaction=reactionData;               
+                        setState(() {
+                          
+                        });}
+                    ),
+                    Text(currentdata.reaction.smile.toString()),
+                  ],
+                ),
+                Column(
+                  children: [
+                    MaterialButton(child:Icon(FontAwesomeIcons.thumbsUp,color: Colors.green,),
+                    minWidth: MediaQuery.of(context).size.width*.16,
+                  color:currentdata.reaction.type=='thumbup'?Colors.green[100]:Colors.white,
+                  elevation: 0,
+                    onPressed: ()async{
+                          await _userReaction.ReactingMethod(currentdata.postId,currentdata.uid,'thumbup');
+                          ReactionData reactionData=await _userReaction.reactionData(currentdata.postId,currentdata.uid);
+                          currentdata.reaction=reactionData;               
+                            setState(() {
+                              
+                            });}
+                    ),
+                    Text(currentdata.reaction.thumbsUp.toString()),
+                  ],
+                ),
+                Column(
+                  children: [
+                    MaterialButton(
+                    child:Icon(FontAwesomeIcons.thumbsDown,color: Colors.black,),
+                    minWidth: MediaQuery.of(context).size.width*.16,
+                  color:currentdata.reaction.type=='thumbdown'? Colors.blue[100]:Colors.white,
+                  elevation: 0,
+                  onPressed: ()async{
+                          await _userReaction.ReactingMethod(currentdata.postId,currentdata.uid,'thumbdown');
+                          ReactionData reactionData=await _userReaction.reactionData(currentdata.postId,currentdata.uid);
+                          currentdata.reaction=reactionData;               
+                            setState(() {
+                              
+                            });
+                    },
+                    ),
+                    Text(currentdata.reaction.thumbsDown.toString()),
+                  ],
+                ),
+                MaterialButton(onPressed: (){},child:Icon(FontAwesomeIcons.comment,color: Colors.blue,),
+                minWidth: MediaQuery.of(context).size.width*.16,),
               ],)
           );
   }

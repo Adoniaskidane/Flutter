@@ -1,5 +1,4 @@
 // ignore_for_file: prefer_const_constructors
-
 import 'package:bunamedia/Pages/services/user.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -43,13 +42,12 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {  
     
     return Scaffold(
-appBar: AppBar(
-        toolbarHeight: 100,
+        appBar: AppBar(
         centerTitle: false,
         title: Row(
           children: [
             CircleAvatar(
-              radius: 30,
+              radius: 20,
               backgroundImage:NetworkImage(
                 Chatter.profile
               ),
@@ -63,27 +61,10 @@ appBar: AppBar(
                 Text(
                   Chatter.username
                 ),
-                Text(
-                  'online',
-                ),
               ],
             ),
           ],
         ),
-        actions: [
-          IconButton(
-              icon: Icon(
-                Icons.videocam_outlined,
-                size: 28,
-              ),
-              onPressed: () {}),
-          IconButton(
-              icon: Icon(
-                Icons.call,
-                size: 28,
-              ),
-              onPressed: () {})
-        ],
         elevation: 0,
       ),
     
@@ -95,45 +76,63 @@ appBar: AppBar(
             children: [
               Expanded(
                 child: Container(
-                  child:ChatBuilder(),)
+                  child:ChatBuilders(),)
               ),
-              Container(
+              
+
+      
+              Row(
+                children: [
+                Container(
+                  width: MediaQuery.of(context).size.width*.7,
+                  padding: EdgeInsets.symmetric(horizontal: 10),
                   child: TextField(
                     controller: text_controller,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: "something..."
+                    ),
                   ),
-              ),
-      
-              Container(
-                child: MaterialButton(
-                  onPressed: ()async{
-                    final sendingText=text_controller.text;
-                    text_controller.clear();
-                    print(sendingText);
-                    if(sendingText.isNotEmpty){
-                      final referenceUserChat=users.doc(CurrentUser.uid).collection('Chatters');
-                      final referenceChatterChat=users.doc(Chatter.uid).collection('Chatters');
-                      final result=await referenceUserChat.where('ChatterID',isEqualTo: Chatter.uid).get();
-                      if(result.docs.isEmpty){
-                        //create a chatroom id and get refrence
-                        final Roomref=await ChatRoom.doc();
-                        //set the created data so that it will have data and will be created
-                        await Roomref.set({'Created':DateTime.now(),'user1':CurrentUser.uid,'user2':Chatter.uid});
-                        //Take that ChatroomID to the user collection and set it chatter doc
-                        referenceUserChat.doc(Chatter.uid).set({'ChatterID':Chatter.uid,'ChatterRef':Roomref});
-                        //Set it to Chatter profile
-                        referenceChatterChat.doc(CurrentUser.uid).set({'ChatterID':CurrentUser.uid,'ChatterRef':Roomref});
-                        Roomref.collection('Chats').doc().set({'Sender':CurrentUser.uid,'Text':sendingText,'Time':DateTime.now()});
-                      }else{
-                        DocumentReference Roomref=result.docs[0].data()['ChatterRef'];
-                        final refs=await Roomref.collection('Chats').get();
-                          print(refs.size);
-                        Roomref.collection('Chats').doc().set({'Sender':CurrentUser.uid,'Text':sendingText,'Time':DateTime.now()});
+                  ),
+                  Container(
+                    color: Colors.orange,
+                    width:MediaQuery.of(context).size.width*.3,
+                    child: MaterialButton(
+                      onPressed: ()async{
+                        final sendingText=text_controller.text;
+                        text_controller.clear();
+                        print(sendingText);
+                        if(sendingText.isNotEmpty){
+                          final referenceUserChat=users.doc(CurrentUser.uid).collection('Chatters');
+                          final referenceChatterChat=users.doc(Chatter.uid).collection('Chatters');
+                          final result=await referenceUserChat.where('ChatterID',isEqualTo: Chatter.uid).get();
+                          if(result.docs.isEmpty){
+                            //create a chatroom id and get refrence
+                            final Roomref=await ChatRoom.doc();
+                            //set the created data so that it will have data and will be created
+                            await Roomref.set({'Created':DateTime.now(),'user1':CurrentUser.uid,'user2':Chatter.uid});
+                            //Take that ChatroomID to the user collection and set it chatter doc
+                            referenceUserChat.doc(Chatter.uid).set({'ChatterID':Chatter.uid,'ChatterRef':Roomref});
+                            //Set it to Chatter profile
+                            referenceChatterChat.doc(CurrentUser.uid).set({'ChatterID':CurrentUser.uid,'ChatterRef':Roomref});
+                            Roomref.collection('Chats').doc().set({'Sender':CurrentUser.uid,'Text':sendingText,'Time':DateTime.now()});
+                          }else{
+                            DocumentReference Roomref=result.docs[0].data()['ChatterRef'];
+                            final refs=await Roomref.collection('Chats').get();
+                              print(refs.size);
+                            Roomref.collection('Chats').doc().set({'Sender':CurrentUser.uid,'Text':sendingText,'Time':DateTime.now()});
+                            await LoadChats();
+                          }
+                        }
                         await LoadChats();
-                      }
-                    }
-                  },
-                  child: Icon(FontAwesomeIcons.paperPlane),
-                ),
+                        setState(() {
+                          
+                        });
+                      },
+                      child: Icon(FontAwesomeIcons.paperPlane),
+                    ),
+                  ),
+                ],
               )
             ],
           ),
@@ -144,10 +143,10 @@ appBar: AppBar(
   }
 
   Future<void> LoadChats()async{
+    print('Here starting');
     final referenceUserChat=users.doc(CurrentUser.uid).collection('Chatters');
     final referenceChatterChat=users.doc(Chatter.uid).collection('Chatters');
     final result=await referenceUserChat.where('ChatterID',isEqualTo: Chatter.uid).get();
-    DocumentReference Roomref=result.docs[0].data()['ChatterRef'];
     if(result.docs.isEmpty){
       size=0;
       setState(() {
@@ -156,29 +155,50 @@ appBar: AppBar(
       });
     }
     else{
-      final res=await Roomref.collection('Chats').orderBy('Time').get();
+      DocumentReference Roomref=result.docs[0].data()['ChatterRef'];
+      final res=await Roomref.collection('Chats').orderBy('Time',descending: true).get();
       print(res.size);
       size=res.size;
       print(res.docs[0].data());
+      List<messages> rebuildmessage=[];
       res.docs.forEach((element){
           String userID=element.data()['Sender'];
           String text=element.data()['Text'];
           Timestamp time=element.data()['Time'];
           time.toDate();
-          allMessage.add(messages(userID: userID, message: text, time:time.toDate()));
+          rebuildmessage.add(messages(userID: userID, message: text, time:time.toDate()));
       });
       setState(() {
         print(allMessage.length);
+        allMessage=rebuildmessage;
         Messageinit=true;
       });
 
     }
   }
 
+    Widget ChatBuilders(){
+    return Container(
+
+      child: Messageinit==false?
+      Container(child: Center(child: Text('Loading...'),),):
+      allMessage.isEmpty?
+      Container(child: Center(child: Text('Say Something')),):
+      Container(
+                  child:ListView.builder(
+                    reverse: true,
+                    itemCount: size,
+                    itemBuilder: (context,index){
+                      return bubbleChat(index);
+                  },
+                )
+              )
+    );
+  }
+
 
   Widget ChatBuilder(){
       return Container(
-              color: Colors.blue,
               height: MediaQuery.of(context).size.height*0.2,
               child:Messageinit==false?Container(
                 child: Center(child: Text('Loading...'),),
@@ -192,12 +212,91 @@ appBar: AppBar(
                     reverse: true,
                     itemCount: size,
                     itemBuilder: (context,index){
-                    return Text(allMessage[index].message,style: TextStyle(fontSize: 30),);
+                      return bubbleChat(index);
                   },
                 )
               ),
               
       ));
+  }
 
+
+
+  Widget bubbleChat(index){
+          final message = allMessage[index];
+          bool ismymessage = allMessage[index].userID==CurrentUser.uid;
+          return Container(
+            margin: EdgeInsets.only(top: 10),
+            child: Column(
+              children: [
+                Text(allMessage[index].time.toString().substring(0,10)),
+                SizedBox(height:10),
+                Row(
+                  mainAxisAlignment:ismymessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    if (!ismymessage)
+                      CircleAvatar(
+                        radius: 15,
+                        backgroundImage: NetworkImage(Chatter.profile),
+                      ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.6),
+                      decoration: BoxDecoration(
+                          color: ismymessage ? Colors.blue[500] : Colors.grey[400],
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                            bottomLeft: Radius.circular(ismymessage ? 12 : 0),
+                            bottomRight: Radius.circular(ismymessage ? 0 : 12),
+                          )),
+                      child: Text(
+                        allMessage[index].message,
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10,),
+                      if(ismymessage)
+                      CircleAvatar(
+                        radius: 15,
+                        backgroundImage: NetworkImage(CurrentUser.profile),
+                      ),
+
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: Row(
+                    mainAxisAlignment:
+                        ismymessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+                    children: [
+                      if (!ismymessage)
+                        SizedBox(
+                          width: 40,
+                        ),
+                      Icon(Icons.done,size: 20,
+                        color: Colors.black,
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Text(
+                          allMessage[index].time.toString().substring(11,16)
+                      ),
+                      if(ismymessage)
+                      SizedBox(width: 10,)
+                    ],
+                  ),
+                )
+              ],
+            ),
+          );
   }
 }

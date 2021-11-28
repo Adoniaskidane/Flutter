@@ -1,4 +1,6 @@
 // ignore_for_file: avoid_print
+import 'dart:math';
+import 'package:bunamedia/Pages/services/reaction.dart';
 import 'package:bunamedia/Pages/services/user_img.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:bunamedia/Pages/services/user.dart';
@@ -66,35 +68,34 @@ class Database{
   }
   //For the other users 
   Future<String> loadCollectionUserImage(String UserID)async{
-    try{
-      final ref = FirebaseStorage.instance.ref().child(UserID).child('Profile').child('Profile');
-      var url = await ref.getDownloadURL();
-      return url;
-    }on FirebaseException catch(e){
-      print('+++++++++++++++++++++++++++++++++++++++++++');
-      print(e);
-      print('+++++++++++++++++++++++++++++++++++++++++++');
-      final ref = FirebaseStorage.instance.ref().child('Defalut').child('profile.png');
-      var url = await ref.getDownloadURL();
-      return url;
-    }    
+      final refpersonal = FirebaseStorage.instance.ref().child(UserID).child('Profile').child('Profile');
+      final refdefault = FirebaseStorage.instance.ref().child('Defalut').child('profile.png');
+      final data=await FirebaseStorage.instance.ref().child(UserID).child('Profile').listAll();
+      if(data.items.isNotEmpty){
+        var url = await refpersonal.getDownloadURL();
+        _user.profile=url;
+        return url;
+      }else{
+            var url = await refdefault.getDownloadURL();
+          _user.profile=url;
+          return url;
+        }  
   }
 
 //This is for the main user
 Future<bool> loadImage()async{
-    try{
-      final ref = FirebaseStorage.instance.ref().child(uid).child('Profile').child('Profile');
-      var url = await ref.getDownloadURL();
-      _user.profile=url;
-    }on FirebaseException catch(e){
-      print('+++++++++++++++++++++++++++++++++++++++++++');
-      print(e);
-      print('+++++++++++++++++++++++++++++++++++++++++++');
-      final ref = FirebaseStorage.instance.ref().child('Defalut').child('profile.png');
-      var url = await ref.getDownloadURL();
-      _user.profile=url;
-    }
-    
+  //print('AAA=====================================================');
+      final refpersonal = FirebaseStorage.instance.ref().child(uid).child('Profile').child('Profile');
+      final refdefault = FirebaseStorage.instance.ref().child('Defalut').child('profile.png');
+      final data=await FirebaseStorage.instance.ref().child(uid).child('Profile').listAll();
+      if(data.items.isNotEmpty){
+        var url = await refpersonal.getDownloadURL();
+        _user.profile=url;
+      }else{
+            var url = await refdefault.getDownloadURL();
+          _user.profile=url;
+      }
+
     return true;
   }
 
@@ -154,7 +155,7 @@ Future<bool> loadImage()async{
     value.docs.forEach((e){
       a.add(e.get('ref'));
     });
-    print(a.length);
+    print('current size: ${a.length}');
 
     for(int i=0;i<a.length;i++){
       UserPost post;
@@ -168,7 +169,9 @@ Future<bool> loadImage()async{
       final time=b.get('Time');
       Timestamp t=time;
       DateTime newtime=t.toDate();
-      post=UserPost(isImage: isImage,isText: isText,time: newtime,profile: profile);
+      UserReaction reaction=UserReaction(user:uid);
+      ReactionData reactionData=await reaction.reactionData(postid,id);
+      post=UserPost(isImage: isImage,isText: isText,time: newtime,profile: profile,reaction: reactionData);
       post.uid=id;
       post.postId=postid;
       if(isText==true)
@@ -182,9 +185,8 @@ Future<bool> loadImage()async{
         post.imgUrl=imgUrl;
       }
       userposts.add(post);
-    }
+  }
 
-  print('${userposts.length}');
   return userposts;
   }
 

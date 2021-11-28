@@ -62,6 +62,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body:PageView(
         controller:_pageController ,
+        physics: NeverScrollableScrollPhysics(),
         children:_screens,
         onPageChanged: _onpagechanged,
       ),
@@ -71,7 +72,7 @@ class _HomePageState extends State<HomePage> {
         onTap: _onpagetab,
         items: [
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.braille,color: currentPage==0?Colors.blue:Colors.grey[600],),
+            icon: Icon(FontAwesomeIcons.rssSquare,color: currentPage==0?Colors.blue:Colors.grey[600],),
             title: Text("Home",style: TextStyle(color: currentPage==0?Colors.blue:Colors.grey[600]),)
           ),
           BottomNavigationBarItem(
