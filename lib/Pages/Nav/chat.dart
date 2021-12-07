@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors
+import 'package:bunamedia/Pages/Nav/profile.dart';
 import 'package:bunamedia/Pages/services/user.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -44,26 +45,33 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
         appBar: AppBar(
         centerTitle: false,
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundImage:NetworkImage(
-                Chatter.profile
-              ),
-            ),
-            SizedBox(
-              width: 20,
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  Chatter.username
+        title: GestureDetector(
+          onTap: (){
+          Navigator.push(context,
+          MaterialPageRoute(builder: (context) => UserProfile(currentuser: Chatter)),
+          );
+          },
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundImage:NetworkImage(
+                  Chatter.profile
                 ),
-              ],
-            ),
-          ],
+              ),
+              SizedBox(
+                width: 20,
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    Chatter.username
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         elevation: 0,
       ),
@@ -224,7 +232,9 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget bubbleChat(index){
           final message = allMessage[index];
-          bool ismymessage = allMessage[index].userID==CurrentUser.uid;
+          bool isMe = allMessage[index].userID==CurrentUser.uid;
+          print('${allMessage[index].message} ${allMessage[index].userID} ${CurrentUser.uid} $isMe');
+          print(CurrentUser.profile);
           return Container(
             margin: EdgeInsets.only(top: 10),
             child: Column(
@@ -232,10 +242,11 @@ class _ChatPageState extends State<ChatPage> {
                 Text(allMessage[index].time.toString().substring(0,10)),
                 SizedBox(height:10),
                 Row(
-                  mainAxisAlignment:ismymessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+                  mainAxisAlignment:
+                  isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    if (!ismymessage)
+                    if (!isMe)
                       CircleAvatar(
                         radius: 15,
                         backgroundImage: NetworkImage(Chatter.profile),
@@ -248,22 +259,23 @@ class _ChatPageState extends State<ChatPage> {
                       constraints: BoxConstraints(
                           maxWidth: MediaQuery.of(context).size.width * 0.6),
                       decoration: BoxDecoration(
-                          color: ismymessage ? Colors.blue[500] : Colors.grey[400],
+                          color: isMe ? Colors.blue[500] : Colors.grey[400],
                           borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(16),
                             topRight: Radius.circular(16),
-                            bottomLeft: Radius.circular(ismymessage ? 12 : 0),
-                            bottomRight: Radius.circular(ismymessage ? 0 : 12),
+                            bottomLeft: Radius.circular(isMe ? 12 : 0),
+                            bottomRight: Radius.circular(isMe ? 0 : 12),
                           )),
                       child: Text(
                         allMessage[index].message,
                         style: TextStyle(
                           fontSize: 20,
+                         
                         ),
                       ),
                     ),
                     SizedBox(width: 10,),
-                      if(ismymessage)
+                    if(isMe)
                       CircleAvatar(
                         radius: 15,
                         backgroundImage: NetworkImage(CurrentUser.profile),
@@ -275,22 +287,25 @@ class _ChatPageState extends State<ChatPage> {
                   padding: const EdgeInsets.only(top: 5),
                   child: Row(
                     mainAxisAlignment:
-                        ismymessage ? MainAxisAlignment.end : MainAxisAlignment.start,
+                        isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
                     children: [
-                      if (!ismymessage)
+                      if (!isMe)
                         SizedBox(
                           width: 40,
                         ),
-                      Icon(Icons.done,size: 20,
+                      Icon(
+                        Icons.done,
+                        size: 20,
                         color: Colors.black,
                       ),
                       SizedBox(
                         width: 8,
                       ),
+
                       Text(
                           allMessage[index].time.toString().substring(11,16)
                       ),
-                      if(ismymessage)
+                      if(isMe)
                       SizedBox(width: 10,)
                     ],
                   ),

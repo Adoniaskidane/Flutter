@@ -14,7 +14,7 @@ class Network extends StatefulWidget {
   _NetworkState createState() => _NetworkState();
 }
 
-class _NetworkState extends State<Network> {
+class _NetworkState extends State<Network> with AutomaticKeepAliveClientMixin{
   CUser _CurrentUser=CUser();
   bool initialization=false;
   TextEditingController search_controller=TextEditingController();
@@ -38,6 +38,7 @@ class _NetworkState extends State<Network> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); 
     //oldMessageLoad();
     return Scaffold(
 
@@ -371,4 +372,8 @@ class _NetworkState extends State<Network> {
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

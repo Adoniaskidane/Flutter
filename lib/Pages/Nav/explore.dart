@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors, avoid_unnecessary_containers, prefer_const_literals_to_create_immutables
+import 'package:bunamedia/Pages/Nav/profile.dart';
 import 'package:bunamedia/Pages/services/db.dart';
 import 'package:bunamedia/Pages/services/pref.dart';
 import 'package:bunamedia/Pages/services/user.dart';
@@ -88,40 +89,47 @@ class _ExploreState extends State<Explore>  with AutomaticKeepAliveClientMixin{
 
   Widget UserExplore(CUser Mediauser)
   {
-    return Container(
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(Mediauser.profile),
-                  ),
-                  SizedBox(width: 10,),
-                  Text(Mediauser.username),
-                ],
-              ),
-
-              ElevatedButton(
-                onPressed: (){
-
-                },
-                child:Row(
+    return GestureDetector(
+      onTap: (){
+          Navigator.push(context,
+          MaterialPageRoute(builder: (context) => UserProfile(currentuser: Mediauser)),
+          );
+      },
+      child: Container(
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
                   children: [
-                    Text('Link',style:TextStyle(fontSize: 20,letterSpacing: 2),),
-                    SizedBox(width: 5,),
-                    Icon(FontAwesomeIcons.userFriends),
+                    CircleAvatar(
+                      radius: 30,
+                      backgroundImage: NetworkImage(Mediauser.profile),
+                    ),
+                    SizedBox(width: 10,),
+                    Text(Mediauser.username),
                   ],
                 ),
-              )
-            ],
-          ),
-          SizedBox(height: 10,),
-          Divider(color: Colors.black,height: 2,),
-        ],
+    
+                ElevatedButton(
+                  onPressed: (){
+    
+                  },
+                  child:Row(
+                    children: [
+                      Text('Link',style:TextStyle(fontSize: 20,letterSpacing: 2),),
+                      SizedBox(width: 5,),
+                      Icon(FontAwesomeIcons.userFriends),
+                    ],
+                  ),
+                )
+              ],
+            ),
+            SizedBox(height: 10,),
+            Divider(color: Colors.black,height: 2,),
+          ],
+        ),
       ),
     );
   }

@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
             title: Text("Explore",style: TextStyle(color: currentPage==2?Colors.blue:Colors.grey[600]))
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings,color: currentPage==3?Colors.blue:Colors.grey[600],),
+            icon: Icon(Icons.account_circle,color: currentPage==3?Colors.blue:Colors.grey[600],),
             title: Text("Account",style: TextStyle(color: currentPage==3?Colors.blue:Colors.grey[600]))
           ),
         ],

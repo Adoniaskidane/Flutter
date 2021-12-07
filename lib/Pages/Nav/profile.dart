@@ -1,222 +1,131 @@
-// ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
-import 'package:bunamedia/Pages/Nav/posts.dart';
-import 'package:bunamedia/Pages/services/auth.dart';
-import 'package:bunamedia/Pages/services/db.dart';
-import 'package:bunamedia/Pages/services/pref.dart';
-import 'package:bunamedia/Pages/services/reaction.dart';
-import 'package:bunamedia/Pages/services/user.dart';
-import 'package:bunamedia/Pages/services/user_img.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+// ignore_for_file: prefer_const_constructors
 import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:bunamedia/Pages/services/reaction.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:bunamedia/Pages/services/user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class Home extends StatefulWidget {
-  const Home({ Key? key }) : super(key: key);
+class UserProfile extends StatefulWidget {
+  final CUser currentuser;
+  const UserProfile({ Key? key, required this.currentuser}) : super(key: key);
 
   @override
-  _HomeState createState() => _HomeState();
+  _UserProfileState createState() => _UserProfileState(user: currentuser);
 }
 
-class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin{
-
-  CUser _CurrentUser=CUser();
-  UserAuthentication _authentication=UserAuthentication(FirebaseAuth.instance);
-  bool initialization=false;
-
-  //Post content variables
-  TextEditingController _postText=TextEditingController();
-  late File _postImage;
-  bool _ispickImage=false;
-  UserImage _pickImage=UserImage();
-  //For the feeding section variables 
-  RefreshController refreshController=RefreshController();
-  List<UserPost> userpost=[];
-  int size=5;
-
-  //Reaction
+class _UserProfileState extends State<UserProfile> {
+  final CUser user;
+  bool loaded=false;
   late UserReaction _userReaction;
+  late String backgroundImg;
+  List<UserPost> mypost=[];
 
-
+  _UserProfileState({required this.user});
   @override
-  void initState(){
+  void initState() {
+    // TODO: implement initState
     getUserData();
     super.initState();
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
-    super.build(context); 
-    return SafeArea(
-      child: Scaffold(
-        body:initialization==true? Container(
-          height: MediaQuery.of(context).size.height,
-          width:  MediaQuery.of(context).size.width,
-          child:Column(
-            children:[
-              Container(
-                alignment: Alignment.center,
-                height: MediaQuery.of(context).size.height*.05,
-                width:  MediaQuery.of(context).size.width,
-                color: Colors.blue[900],
-                child: Text("BunaMedia",
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue[900],
+        title: Text("BunaMedia",
                     style :TextStyle(
                       color: Colors.white,
                       fontFamily: 'Times',
                       fontSize: 20
                     ),
                   ),
-              ),
-              //Container for header pic, username and post button
-              Container(
-                height: MediaQuery.of(context).size.height*.12,
-                width:  MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  border:Border(
-                    bottom: BorderSide(
-                      color: Colors.blue.shade900
-                    )
-                  )
-                ),
-                //put them in row
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            alignment: Alignment.centerLeft,
-                            child: CircleAvatar(
-                              radius: 33,
-                              backgroundImage:NetworkImage(_CurrentUser.profile) ,
-                            ),
-                          ),
-                          Container(
-                            //padding: EdgeInsets.all(10),
-                            alignment:Alignment.centerRight,
-                            child: Text(_CurrentUser.username,
-                              style :TextStyle(
-                                fontFamily: 'Times',
-                                fontSize: 25
-                              ),
-                        )
-                      ),
-
-                        ],
-                      ),
-                      //Post button
-                      Container(
-                        padding: EdgeInsets.all(10),
-                        alignment: Alignment.centerLeft,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                          primary: Colors.blue.shade900,
-                          fixedSize: Size.fromWidth(120),
-                        ),
-                        onPressed: (){Navigator.push(context, MaterialPageRoute(builder: (context) => PostPage(user: _CurrentUser,)));},
-                        child:Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Icon(FontAwesomeIcons.plusCircle),
-                            SizedBox(width: 10,),
-                            Text("POST",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500
-                              ), 
-                            ),
-                            
-                          ],
-                        )),
-                      ),
-                    ],
-          ),
-              ),
-
-              //This is the feeding part of the page:
-              
-              Container(
-                height:MediaQuery.of(context).size.height*0.699,
-                //color: Colors.blue,
-                child:SmartRefresher(
-                  onLoading: ()async{
-                        Database db=Database(uid: _CurrentUser.uid);
-                        size+=5;
-                        //print(size);
-                        final currently=userpost.length;
-                        userpost=await db.getFeedingData(size);
-                        size=userpost.length;
-                        if(currently==size){
-                          refreshController.loadNoData();
-                        }else{
-                          refreshController.loadComplete();
-                        }
-
-                    setState(() {
-                      
-                    });
-                  },
-                  onRefresh: ()async{
-                        Database db=Database(uid: _CurrentUser.uid);
-                        size+=5;
-                        final currently=userpost.length;
-                        userpost=await db.getFeedingData(size);
-                        size=userpost.length;
-                        if(currently==size){
-                          refreshController.refreshToIdle();
-                        }else{
-                          refreshController.refreshCompleted();
-                        }
-                    setState(() {
-                      
-                    });
-                  },
-                  controller: refreshController,
-                  enablePullUp: true,
-                  child: ListView.builder(
-                    itemCount: userpost.length,
-                    itemBuilder:(context,index){
-                      final currentdata=userpost[index];
-                      print(currentdata.reaction.isreacted);
-                      //print('here  are the data: ${currentdata.postId}');
-                      return CustomCard(currentdata,index);
-          
-                    }
-                  ),
-                ),
-              )
-            ],
-          )
-         
-        ):
-      Center(child: CircularProgressIndicator())
+          centerTitle: true,
       ),
+      body:SafeArea(
+        child: Column(
+          children: [
+            loaded==true?CustomBody():
+            Center(child: CircularProgressIndicator()),
+          ],
+        ),
+      ),      
     );
   }
 
-  void getUserData()async{
-    _CurrentUser.uid=await getCurrentUser();
-    final uid=_CurrentUser.uid;
-    print('current user $uid');
-    Database db=Database(uid: uid);
-    _CurrentUser=await db.getUser();
-    userpost=await db.getFeedingData(size);
-    _userReaction=UserReaction(user: uid);
-    setState(() {
-      initialization=true;
-    });
-  }
-  Future<String> getCurrentUser() async{
-    Userpreference pref=Userpreference();
-    final result= await pref.getUserprefrerence();
-    return result;
+  Widget CustomBody(){
+    return Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height*.815,
+        child: ListView(
+          children: [
+            HeaderPage(),
+            UsernameLabel(user.first+' '+user.last),
+            personalPost()
+          ],
+        ),
+    );
   }
 
-  Widget CustomCard(UserPost currentdata,index){
+    Widget UsernameLabel(String name){
+    return   Container(
+                alignment: Alignment.center,
+                height: MediaQuery.of(context).size.height*.05,
+                width:  MediaQuery.of(context).size.width,
+                color: Colors.black87,
+                child: Text(name,
+                    style :TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Times',
+                      fontSize: 20
+                    ),
+                  ),
+              );
+  }
+
+    Widget HeaderPage(){
+    return Stack(
+              children: [
+                Container(
+                  height: MediaQuery.of(context).size.height*0.4,
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.red,
+                  child: Image(image:NetworkImage(backgroundImg),fit: BoxFit.fitWidth,),
+                ),
+                Positioned(
+                  left: MediaQuery.of(context).size.width*0.3,
+                  top:MediaQuery.of(context).size.height*0.05 ,
+                  child: CircleAvatar(
+                    backgroundImage:NetworkImage(user.profile) ,
+                    radius: 70,
+                  ),
+                ),
+              ],
+    );
+  }
+
+
+
+   Widget personalPost(){
+    return  Container(
+        //color: Colors.orange,
+          child:ListView.builder(
+              physics: ScrollPhysics(),
+              shrinkWrap: true,
+              itemCount: mypost.length,
+              itemBuilder:(context,index){
+                final currentdata=mypost[index];
+                return CustomCard(currentdata,index);
+              }
+            ),
+          
+        
+      );;
+  }
+
+Widget CustomCard(UserPost currentdata,index){
     return Container(
     //height:MediaQuery.of(context).size.height*0.5,
       child:Column(
@@ -272,6 +181,8 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin{
     );
   }
 
+
+
   Widget HeaderProfile(CUser user){
     return Container(
       child: Row(
@@ -303,6 +214,9 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin{
       ),
     );
   }
+
+
+
 
   Widget ReactionButtons(UserPost currentdata,index){
        return     Container(
@@ -407,12 +321,68 @@ class _HomeState extends State<Home> with AutomaticKeepAliveClientMixin{
               ],)
           );
   }
+  Future<void>  getUserData()async{
+    backgroundImg =await backgroundURL();
+    _userReaction=UserReaction(user:user.uid);
+    mypost=await getFeedingData(5);
+    setState(() {
+      loaded=true;
+    });
+   }
 
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
-  
+
+  Future<String> backgroundURL()async{
+     String url;
+      final refpersonal = FirebaseStorage.instance.ref().child(user.uid).child('BackgroundProfile').child('BackgroundProfile');
+      final refdefault = FirebaseStorage.instance.ref().child('Defalut').child('background1.png');
+      final data=await FirebaseStorage.instance.ref().child(user.uid).child('BackgroundProfile').listAll();
+      if(data.items.isNotEmpty){
+        var url = await refpersonal.getDownloadURL();
+        return url;
+      }else{
+        var url = await refdefault.getDownloadURL();
+        return url;
+      }
+   }
+
+Future<List<UserPost>> getFeedingData(int size)async{
+    CollectionReference userdata = FirebaseFirestore.instance.collection('Users').doc(user.uid).collection('Post');
+    List<UserPost> userposts=[];
+
+    final value=await userdata.limit(size).orderBy('Time',descending: true).get();
+    for(int i=0;i<value.size;i++){
+      UserPost post;
+      final b=value.docs[i];
+      final postid=value.docs[i].id;
+      print(b.data());
+      final isImage=b.get('isImage');
+      final isText=b.get('isText');
+      final time=b.get('Time');
+      Timestamp t=time;
+      DateTime newtime=t.toDate();
+      UserReaction reaction=UserReaction(user:user.uid);
+      ReactionData reactionData=await reaction.reactionData(postid,user.uid);
+      post=UserPost(isImage: isImage,isText: isText,time: newtime,profile: user,reaction: reactionData);
+      post.uid=user.uid;
+      post.postId=postid;
+      if(isText==true)
+      {
+        final text=b.get('Text');
+        post.text=text;
+      }
+      if(isImage==true)
+      {
+        final imgUrl=b.get('ImgUrl');
+        post.imgUrl=imgUrl;
+      }
+      userposts.add(post);
+    }
+    return userposts;
+  }
 
 }
+
+
+
 
 

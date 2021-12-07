@@ -73,11 +73,9 @@ class Database{
       final data=await FirebaseStorage.instance.ref().child(UserID).child('Profile').listAll();
       if(data.items.isNotEmpty){
         var url = await refpersonal.getDownloadURL();
-        _user.profile=url;
         return url;
       }else{
             var url = await refdefault.getDownloadURL();
-          _user.profile=url;
           return url;
         }  
   }
@@ -185,9 +183,8 @@ Future<bool> loadImage()async{
         post.imgUrl=imgUrl;
       }
       userposts.add(post);
-  }
-
-  return userposts;
+    }
+    return userposts;
   }
 
   Future<bool> getCollectionUsers(int size)async{
