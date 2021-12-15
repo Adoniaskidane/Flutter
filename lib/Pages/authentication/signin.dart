@@ -76,6 +76,7 @@ class _SignInPageState extends State<SignInPage> {
                       child: TextFormField(
                         controller: _password,
                         validator: _isvalid.passValidator,
+                        obscureText: true,
                         decoration: InputDecoration(
                           fillColor: Colors.white,
                           filled: true,
